@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.syc.suda.mapper.TaskGroupMapper">
+
+    <resultMap id="taskGroupMap" type="com.syc.suda.entity.TaskGroup">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="type" column="type"/>
+        <collection property="tasks" ofType="com.syc.suda.entity.HttpMaterial">
+            <id property="id" column="task_id"/>
+            <result property="name" column="task_name"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="httpMaterialMap" type="com.syc.suda.entity.TaskGroup">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="type" column="type"/>
+        <collection property="tasks" ofType="com.syc.suda.entity.HttpMaterial">
+            <id property="id" column="task_id"/>
+            <result property="name" column="task_name"/>
+        </collection>
+    </resultMap>
+
+    <select id="listHttpMaterial" resultMap="httpMaterialMap">
+
+    </select>
+
+    <select id="listTaskGroups" resultMap="taskGroupMap">
+        select
+        t1.id as id,
+        t1.name,
+        t2.name as task_name,
+        t2.id as task_id
+        from task_group t1
+        left join http_material t2 on t1.id = t2.task_group_id
+    </select>
+</mapper>

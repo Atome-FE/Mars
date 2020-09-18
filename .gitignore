@@ -1,0 +1,12 @@
+client/node_modules
+client/Dockerfile
+client/Jenkinsfile
+server/build
+server/docker-compose.yml
+server/Jenkinsfile
+server/.gradle
+server/logs
+server/files
+dev-docker/base/usr/mysql/data
+dev-docker/back/logs
+my.sql

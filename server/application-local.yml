@@ -1,0 +1,45 @@
+spring:
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mysql://192.168.9.180:6606/mars?useUnicode=true&characterEncoding=UTF-8&useAffectedRows=true&autoReconnect=true&zeroDateTimeBehavior=convertToNull&connectTimeout=2000&sessionVariables=character_set_connection=utf8mb4&character_set_client=utf8mb4
+    username: root
+    password: root
+  jackson:
+    deserialization:
+      fail_on_unknown_properties: false
+    # date-format: yyyy-MM-dd HH:mm:ss
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: true
+
+server:
+  port: 9098
+  servlet:
+    context-path: /t-api/v1
+
+security:
+  secret: secret-test
+  encrypt-secret: 0cc45749ee02b1a52c9a36758a5a174d
+
+mybatis:
+  mapper-locations: classpath:mapper/*
+  configuration:
+    map-underscore-to-camel-case: true
+
+token:
+  jwt:
+    appName: super-mars
+    secret: local.test
+    expInSeconds: 90000
+    mobileExpInSeconds: 3600
+    deviceType: NORMAL #NORMAL|MOBILE|TABLET
+    autoRefresh: true #true[default true]|false
+    exclude: /**/**
+
+logging:
+  config: logback-spring.xml
+
+t:
+  file:
+    path: ''
+      # /Users/chenqinglin/Documents/personal/t-boss/suda/files/

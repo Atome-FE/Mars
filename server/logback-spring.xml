@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--See https://logback.qos.ch/manual/configuration.html for details-->
+<configuration debug="false">
+    <property name="LOG_PATH" value="logs"/>
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
+    <springProperty name="APPLICATION_NAME" source="spring.application.name"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.springframework.cache" level="DEBUG">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+
+    <appender name="ROLLING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>
+            ${LOG_PATH}/stdout.log
+        </file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <maxHistory>90</maxHistory>
+            <fileNamePattern>${LOG_PATH}/stdout.log.%d{yyyy-MM-dd}</fileNamePattern>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <maxHistory>90</maxHistory>
+            <fileNamePattern>${LOG_PATH}/error.log.%d{yyyy-MM-dd}</fileNamePattern>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <appender name="API" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <maxHistory>90</maxHistory>
+            <fileNamePattern>${LOG_PATH}/api.log.%d{yyyy-MM-dd}</fileNamePattern>
+        </rollingPolicy>
+        <encoder>
+            <pattern>
+                ${LOG_PATTERN}
+            </pattern>
+        </encoder>
+    </appender>
+
+    <springProfile name="local">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ERROR"/>
+            <appender-ref ref="ROLLING_FILE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="test">
+        <root level="INFO">
+            <appender-ref ref="ERROR"/>
+            <appender-ref ref="ROLLING_FILE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="staging">
+        <root level="INFO">
+            <appender-ref ref="ERROR"/>
+            <appender-ref ref="ROLLING_FILE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="production">
+        <!-- https://github.com/logstash/logstash-logback-encoder#custom-fields -->
+        <!-- https://balamaci.ro/java-app-monitoring-with-elk-logstash/ -->
+        <appender name="STASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+            <destination>172.21.194.178:51401</destination>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <customFields>
+                    {
+                    "project": "xx-id",
+                    "module": "${APPLICATION_NAME:-unknown}",
+                    "appVersion": "${APPLICATION_VERSION:-unknown}"
+                    }
+                </customFields>
+            </encoder>
+            <filter class="ch.qos.logback.classic.filter.LevelFilter">
+                <level>DEBUG</level>
+                <onMatch>DENY</onMatch>
+                <onMismatch>ACCEPT</onMismatch>
+            </filter>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="ERROR"/>
+            <appender-ref ref="ROLLING_FILE"/>
+            <appender-ref ref="STASH"/>
+        </root>
+    </springProfile>
+</configuration>

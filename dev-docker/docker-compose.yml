@@ -1,0 +1,42 @@
+version: "3.7"
+services:
+  back:
+    image: marsback
+    restart: always
+    environment:
+      - SPRING_PROFILES_ACTIVE=${APPLICATION_ENV}
+      - APPLICATION_ENV=${APPLICATION_ENV}
+    volumes:
+      - ./back/logs:/app/logs
+      - ./file:/app/files/
+      - ../server/application-local.yml:/app/application-local.yml
+      # - /home/sysop/.ssh:/home/sysop/.ssh
+    depends_on:
+      - mars_mysql_db
+   #   - db
+    ports:
+      - 9098:9098
+      - 9092:9092
+    # networks:
+    #   t-boss:
+    #     aliases:
+    #       - mars_mysql_db
+  
+  mars_mysql_db:
+    #构建mysql镜像
+    image: mariadb:10.4.6
+    container_name: mysql-db # 容器名
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci #设置utf8字符集
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root #root管理员用户密码
+      MYSQL_USER: test   #创建test用户
+      MYSQL_PASSWORD: test  #设置test用户的密码
+    ports:
+      - '6606:3306'  #host物理直接映射端口为6606
+    volumes:
+      - ./base/usr/mysql/init:/docker-entrypoint-initdb.d
+      # mysql数据库挂载到host物理机目录./base/usr/mysql/data
+      - ./base/usr/mysql/data:/var/lib/mysql
+      # 容器的配置目录挂载到host物理机目录./base/etc/mysql/conf.d
+      - ./base/etc/mysql/conf.d:/etc/mysql/conf.d
